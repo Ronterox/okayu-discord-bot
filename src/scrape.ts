@@ -10,9 +10,17 @@ export async function scrapeMercadoLibre(product: string) {
 			return match.replace('class="ui-search-item__title shops__item-title">', "").replace("</h2>", "");
 		});
 
+		const numericPrices: string[] = [];
 		const priceRegex = /class="andes-visually-hidden">(.+?)<\/span>/g;
-		const prices = html.match(priceRegex)?.map(function (match) {
-			return match.replace('class="andes-visually-hidden">', "").replace("</span>", "");
+		const textPrices = html.match(priceRegex)?.map(function (match) {
+			const textPrice = match.replace('class="andes-visually-hidden">', "").replace("</span>", "").replace("Antes: ", "");
+			const words = textPrice.split(" ");
+			let amount = parseInt(words[0]);
+			if (textPrice.includes("centavos") || textPrice.includes("centavo")) {
+				amount += 0.01 * parseInt(words[words.length - 2]); 
+			}
+			numericPrices.push(amount + "");
+			return textPrice;
 		});
 
 		const imgRegex = /<img[^>]*src="([^"]*)"[^>]*>/g;
@@ -29,7 +37,7 @@ export async function scrapeMercadoLibre(product: string) {
 		links = links?.filter((link) => link.startsWith("https://articulo.mercadolibre.com.ve/"));
 		links = links?.map((link) => link.replace(/#.*$/, ""));
 
-		return [titles, prices, imgs, links];
+		return [titles, textPrices, numericPrices, imgs, links];
 	});
 }
 
