@@ -21,7 +21,6 @@ const client = new Client({ intents: GatewayIntentBits.Guilds + GatewayIntentBit
 client.on(Events.ClientReady, () => console.log("Okayuu~"));
 
 client.on(Events.MessageCreate, (message: Message) => {
-	console.log(message);
 	if (message.author.bot) return;
 
 	const text = message.content.toLowerCase();
